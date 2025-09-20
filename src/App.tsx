@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, } from "./components/ui/sidebar";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { StudentList } from "./components/StudentList";
@@ -24,6 +24,7 @@ import {
   UserCog
 } from "lucide-react";
 import MarksSection from "./components/MarksSection";
+import MarksView from "./components/MarksView";
 
 const navigationItems = [
   {
@@ -78,18 +79,198 @@ const navigationItems = [
   }
 ];
 
+type Teacher = {
+  message: string,
+  user_id: string,
+  email: string,
+  teacher: {
+    teacher_id: string,
+    first_name: string,
+    last_name: string,
+    designation: string,
+    education: string,
+    ph: string,
+    salary: number,
+    address: string,
+    gender: string,
+    user_id: string,
+    my_class: number
+  },
+  class_info: [
+    {
+      tsc_id: string,
+      teacher_id: string,
+      subject_id: string,
+      class_id: number
+    }
+  ]
+}
+
+type Class = {
+  class_id: number,
+  class_name: string,
+  strength: number,
+  room_no: string
+}
+
+type Subject = {
+  subject_id: string,
+  subject_name: string
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [teacherDetails, setTeacherDetails] = useState<Teacher>(null);
+  const [subjects, setSubjects] = useState<Subject[]>(null);
+  const [classes, setClasses] = useState<Class[]>();
+
+  useEffect(() => {
+  async function loginAndFetch(email, password) {
+    const res = await fetch("http://127.0.0.1:8000/api/api/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Login failed");
+
+    // Save tokens & teacher info
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("refresh_token", data.refresh_token);
+    localStorage.setItem("expires_in", data.expires_in);
+    localStorage.setItem("teacher", JSON.stringify(data.teacher));
+
+    setTeacherDetails(data.teacher);
+
+    // Fetch related data
+    await fetchSubjects(data.teacher.teacher_id, data.access_token);
+
+    return data;
+  }
+
+  async function fetchSubjects(teacher_id, token) {
+    // Fetch subjects
+    const subjectRes = await fetch(`http://127.0.0.1:8000/api/subjects/${teacher_id}/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const subjectsData = await subjectRes.json();
+    setSubjects(subjectsData);
+
+    // Fetch classes
+    const classRes = await fetch(`http://127.0.0.1:8000/api/classes/${teacher_id}/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const classesData = await classRes.json();
+    setClasses(classesData);
+  }
+
+  async function init() {
+    const token = localStorage.getItem("access_token");
+    const teacher = localStorage.getItem("teacher");
+
+    if (token && teacher) {
+      const teacherObj = JSON.parse(teacher);
+      setTeacherDetails(teacherObj);
+      console.log(teacherObj.teacher_id);
+      await fetchSubjects(teacherObj.teacher_id, token);
+    } else {
+      // If no tokens → login
+      await loginAndFetch("priyachopra@gmail.com", "password");
+    }
+  }
+
+  init();
+}, []);
+
+  // useEffect(() => {
+  //   async function fetchTeacherDetails(email, password) {
+  //     const res = await fetch("http://127.0.0.1:8000/api/api/login/", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ email, password }),
+  //     });
+
+  //     const data = await res.json();
+  //     console.log("data: ",data);
+  //     if (!res.ok) throw new Error(data.error || "Login failed");
+      
+  //     localStorage.setItem("access_token", data.access_token);
+  //     localStorage.setItem("refresh_token", data.refresh_token);
+  //     localStorage.setItem("expires_in", data.expires_in); 
+  //     localStorage.setItem("teacher", JSON.stringify(data.teacher));
+
+
+  //     // classes come from login response
+  //     // setTeacherDetails(data);
+  //     console.log("data: ", data);
+  //     return data;
+  //   }
+
+  //   if (!localStorage.getItem("access_token")) {
+  //     // fetchTeacherDetails("kritichopra@gmail.com", "password");
+  //     fetchTeacherDetails("priyachopra@gmail.com", "password");
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   // setTeacherDetails(teacherObj);
+  //   const token = localStorage.getItem("access_token");
+
+  //   fetch(`http://127.0.0.1:8000/api/classes/${teacherDetails.teacher_id}/`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setClasses(data);  // now full details come from backend
+  //       console.log("Classes after reload:", data);
+  //     });
+    
+  // }, [teacherDetails]);
+
+// useEffect(() => {
+//     async function getClasses(teacher_id){
+//       const res = await fetch(`http://127.0.0.1:8000/api/classes/${teacher_id}/`);
+//       const data = await res.json();
+//       // console.log(data);
+//       setClasses(data)
+//       return await data;
+//     }
+//     const token = localStorage.getItem("access_token");
+//     const teacher = localStorage.getItem("teacher");
+//     // console.log("inside the initial useEffect hook");
+//     if (teacher) {
+//       const teacherObj = JSON.parse(teacher);
+//       // console.log("teacherObj:",teacherObj.teacher_id);
+//       setTeacherDetails(teacherObj);
+//       // console.log(getClasses(teacherObj.teacher_id))
+//     }
+//   }, []);
+
+
+  // useEffect(() => {
+  //   async function fetchClasses() {
+  //     const data = await fetch(`http://127.0.0.1:8000/api/classes/${teacherDetails.teacher.teacher_id}`);
+  //     const response = await data.json();
+  //     console.log("from the fetchClasses fxn: ", response);
+  //     return response;
+  //   }
+  //   fetchClasses().then(setClasses);
+
+  // }, [teacherDetails])
 
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
         return <DashboardOverview />;
-      // case "students":
-      //   return <StudentList />;
       case "students-marks":
-        return (<MarksSection />);
+        return (<>
+          <>
+            <MarksView subjects_list={subjects} />
+            <MarksSection subjects_list={subjects} />
+          </>
+        </>);
       case "students-attendance":
         return <AttendanceTracker />;
       case "students-TT":
@@ -128,7 +309,7 @@ export default function App() {
         return <DashboardOverview />;
     }
   };
-
+  console.log("teacherDetails: ", teacherDetails)
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -191,10 +372,14 @@ export default function App() {
                   MJ
                 </div>
               </Avatar>
-              <div className="flex-1">
-                <p className="text-sm">Ms. Johnson</p>
-                <p className="text-xs text-muted-foreground">Science Teacher</p>
+              {teacherDetails ?
+              (<div className="flex-1">
+                <p className="text-sm"><>{teacherDetails.first_name}</> <>{teacherDetails.last_name}</></p>
+                <p className="text-xs text-muted-foreground">{teacherDetails.designation}</p>
               </div>
+              ) : (
+                  <p>Loading...</p>
+              )}
             </div>
             
             <SidebarMenu>
