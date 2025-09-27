@@ -26,6 +26,8 @@ export function DashboardOverview({ my_class_id, teacher_id }) {
   const [passedStudents, setPassedStudents] = useState(0);
   const [gradeCounts, setGradeCounts] = useState({});
 
+  const baseURL = 'https://eduvista-backend-render.onrender.com';
+
   console.log("from dashboard: ", my_class_id, teacher_id)
   // FOR STUDENTS LIST THAT COME UNDER THE TEACHER'S CLASS
   useEffect(() => {
@@ -34,7 +36,8 @@ export function DashboardOverview({ my_class_id, teacher_id }) {
       try {
         const formattedDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
         console.log("formattedDate: ",formattedDate)
-        const res = await fetch(`http://127.0.0.1:8000/api/api/myclass/students/${my_class_id}/?date=${formattedDate}`);
+        // const res = await fetch(`http://127.0.0.1:8000/api/api/myclass/students/${my_class_id}/?date=${formattedDate}`);
+        const res = await fetch(`${baseURL}api/myclass/students/${my_class_id}/?date=${formattedDate}`);
         const data = await res.json();
         console.log(data);
         setStudents(data.students || []);
@@ -50,7 +53,8 @@ export function DashboardOverview({ my_class_id, teacher_id }) {
     async function getSubjectId() {
       // console.log("inside getSubjectId")
       try {
-        const data = await fetch(`http://127.0.0.1:8000/api/subject/${teacher_id}/${my_class_id}`);
+        // const data = await fetch(`http://127.0.0.1:8000/api/subject/${teacher_id}/${my_class_id}`);
+        const data = await fetch(`${baseURL}/subject/${teacher_id}/${my_class_id}`);
         const response = await data.json();
         console.log("response from subjectId useEffect: ", response);
         console.log("From getSubject fxn: ", response);
@@ -67,7 +71,8 @@ export function DashboardOverview({ my_class_id, teacher_id }) {
   useEffect(() => {
       async function fetchMarks() {
         if(subjectId != undefined){
-          const data = await fetch(`http://127.0.0.1:8000/api/marks/${subjectId}/${my_class_id}/${"Final"}`);
+          // const data = await fetch(`http://127.0.0.1:8000/api/marks/${subjectId}/${my_class_id}/${"Final"}`);
+          const data = await fetch(`${baseURL}/marks/${subjectId}/${my_class_id}/${"Final"}`);
           const response = await data.json();
           console.log("response: ", response);
           return response;
@@ -114,7 +119,8 @@ export function DashboardOverview({ my_class_id, teacher_id }) {
   useEffect(() => {
     async function getGrades() {
       try{
-        const data = await fetch(`http://127.0.0.1:8000/api/grades/${teacher_id}/${subjectId}/${my_class_id}/Final`);
+        // const data = await fetch(`http://127.0.0.1:8000/api/grades/${teacher_id}/${subjectId}/${my_class_id}/Final`);
+        const data = await fetch(`${baseURL}/grades/${teacher_id}/${subjectId}/${my_class_id}/Final`);
         const res = await data.json();
         console.log("res: ", res);
         return res;

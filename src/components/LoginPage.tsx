@@ -11,13 +11,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   // const navigate = useNavigate();
 
+  const baseURL = 'https://eduvista-backend-render.onrender.com';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/api/login/", {
+      // const res = await fetch("http://127.0.0.1:8000/api/api/login/", {
+      const res = await fetch(`${baseURL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

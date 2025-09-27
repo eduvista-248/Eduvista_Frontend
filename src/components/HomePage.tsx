@@ -130,6 +130,8 @@ export default function HomePage({teacher}) {
   const [subjects, setSubjects] = useState<Subject[]>(null);
   const [classes, setClasses] = useState<Class[]>();
 
+  const baseURL = 'https://eduvista-backend-render.onrender.com';
+
   console.log("from homepage: ", teacher)
   useEffect(() => {
     async function loginAndFetch(email, password) {
@@ -141,7 +143,8 @@ export default function HomePage({teacher}) {
 
   async function fetchSubjects(teacher_id, token) {
     // Fetch subjects
-    const subjectRes = await fetch(`http://127.0.0.1:8000/api/subjects/${teacher_id}/`, {
+    // const subjectRes = await fetch(`http://127.0.0.1:8000/api/subjects/${teacher_id}/`, {
+    const subjectRes = await fetch(`${baseURL}/api/subjects/${teacher_id}/`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const subjectsData = await subjectRes.json();
