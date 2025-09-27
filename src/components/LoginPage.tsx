@@ -80,14 +80,14 @@ export default function LoginPage() {
 
         {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
 
-        <div className="extra-links">
+        {/* <div className="extra-links">
           <p>
             Don’t have an account? <a href="/signup">sign up</a>
           </p>
           <p>
             <a href="#">Forgot Password?</a>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
