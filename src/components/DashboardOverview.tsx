@@ -3,14 +3,7 @@ import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Users, BookOpen, CheckCircle, TrendingUp, Calendar, Clock } from "lucide-react";
-
-const gradeDistribution = [
-  { grade: 'A', count: 12 },
-  { grade: 'B', count: 18 },
-  { grade: 'C', count: 8 },
-  { grade: 'D', count: 3 },
-  { grade: 'F', count: 1 }
-];
+import { useState, useEffect } from "react";
 
 const weeklyProgress = [
   { day: 'Mon', assignments: 15, submissions: 12 },
@@ -20,7 +13,162 @@ const weeklyProgress = [
   { day: 'Fri', assignments: 22, submissions: 20 }
 ];
 
-export function DashboardOverview() {
+let gradeDistribution = []
+let average = 0;
+
+
+export function DashboardOverview({ my_class_id, teacher_id }) {
+  const [students, setStudents] = useState();
+  const [marksList, setMarksList] = useState();
+  const [gradesList, setGradesList] = useState();
+  const [avgMark, setAvgMark] = useState(0);
+  const [subjectId, setSubjectId] = useState();
+  const [passedStudents, setPassedStudents] = useState(0);
+  const [gradeCounts, setGradeCounts] = useState({});
+
+  console.log("from dashboard: ", my_class_id, teacher_id)
+  // FOR STUDENTS LIST THAT COME UNDER THE TEACHER'S CLASS
+  useEffect(() => {
+    const selectedDate = new Date("2024-12-31");
+    async function fetchAttendance() {
+      try {
+        const formattedDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+        console.log("formattedDate: ",formattedDate)
+        const res = await fetch(`http://127.0.0.1:8000/api/api/myclass/students/${my_class_id}/?date=${formattedDate}`);
+        const data = await res.json();
+        console.log(data);
+        setStudents(data.students || []);
+      } catch (err) {
+        console.error("Error fetching attendance:", err);
+      }
+    }
+    fetchAttendance();
+  }, [my_class_id]);
+
+  // FOR THE SUBJECT_ID COMMON FOR TEACHER AND CLASS
+  useEffect(()=>{
+    async function getSubjectId() {
+      // console.log("inside getSubjectId")
+      try {
+        const data = await fetch(`http://127.0.0.1:8000/api/subject/${teacher_id}/${my_class_id}`);
+        const response = await data.json();
+        console.log("response from subjectId useEffect: ", response);
+        console.log("From getSubject fxn: ", response);
+        return response[0].subject_id;
+      }catch (err){
+        console.log("failed to fetch subjects. ", err);
+      }
+    }
+    console.log("Inside the useEffect for getting subjects")
+    getSubjectId().then(setSubjectId);
+  }, [teacher_id, my_class_id])
+
+  // FOR GETTING THE MARKS OF THE STUDENTS  
+  useEffect(() => {
+      async function fetchMarks() {
+        if(subjectId != undefined){
+          const data = await fetch(`http://127.0.0.1:8000/api/marks/${subjectId}/${my_class_id}/${"Final"}`);
+          const response = await data.json();
+          console.log("response: ", response);
+          return response;
+        }
+      }
+      const studentIds = students ? students.map(students => students.student_id) : [];
+      // console.log("student ids: ", studentIds)
+      if (students) {
+        fetchMarks().then(setMarksList);
+      }
+    }, [my_class_id, students, subjectId])
+
+    // FOR GETTING THE AVG MARKS & STUDENTS OVER 70  OF THE STUDENTS
+  // useEffect(() => {
+  //   marksList && marksList.map(gradeItem => {
+  //     sum += gradeItem.marks;
+  //     if(gradeItem.marks>70)  count++;
+  //   });
+  //   console.log("sum:", sum);
+  //   setAvgMark(marksList ? (sum/marksList.length) : 0)
+  //   setPassedStudents(marksList ? count : 0)
+  // }, [marksList])
+  useEffect(() => {
+  if (Array.isArray(marksList)) {
+    let sum = 0;
+    let count = 0;
+
+    marksList.forEach(gradeItem => {
+      sum += gradeItem.marks;
+      if (gradeItem.marks > 70) count++;
+    });
+
+    console.log("sum:", sum);
+    setAvgMark(sum / marksList.length);
+    average = sum / marksList.length;
+    setPassedStudents(count);
+  } else {
+    setAvgMark(0);
+    setPassedStudents(0);
+  }
+}, [marksList]);
+  
+  // FOR GETTING THE GRADES OF THE STUDENTS
+  useEffect(() => {
+    async function getGrades() {
+      try{
+        const data = await fetch(`http://127.0.0.1:8000/api/grades/${teacher_id}/${subjectId}/${my_class_id}/Final`);
+        const res = await data.json();
+        console.log("res: ", res);
+        return res;
+      }
+      catch (err){
+        console.log("Unable to get grades", err);
+      }
+    }
+    subjectId && getGrades().then(setGradesList);
+  }, [teacher_id, subjectId, my_class_id])
+  
+
+  
+  // console.log("gradeCounts: ",gradeCounts);
+
+  useEffect(()=>{
+    let buffer = gradesList ? Object.values(gradesList).reduce((acc, mark) => {
+      const grade = mark.grade || "N/A";
+      acc[grade] = (acc[grade] || 0) + 1;
+      return acc;
+    }, {}) : {};
+    setGradeCounts(buffer)
+  }, [gradesList])
+
+  useEffect(() => {
+    gradeDistribution = Object.entries(gradeCounts).map(([grade, count]) => ({
+    grade,
+    count
+  }));
+  console.log("gradeDistribution: ", gradeDistribution)
+  }, [gradeCounts])
+
+  let grades = []
+  const totalStudents = students ? students.length : 0;
+  // const gradeDistribution = gradesList ? (gradesList.map((gradeItem)=>{
+  //   grades.push({grade: gradeItem.grade, })
+  // }[
+  // { grade: 'A', count: 12 },
+  // { grade: 'B', count: 18 },
+  // { grade: 'C', count: 8 },
+  // { grade: 'D', count: 3 },
+  // { grade: 'F', count: 1 }
+  // ]) : [];
+
+  
+
+  // // Convert to array of objects if needed
+  // const gradeAggregate = gradesList ? Object.entries(gradeCounts).map(([grade, count]) => ({
+  //   grade,
+  //   count
+  // })) : [];
+
+  // console.log(gradeAggregate);
+
   return (
     <div className="space-y-6">
       <div>
@@ -35,7 +183,7 @@ export function DashboardOverview() {
             <Users className="h-8 w-8 text-blue-600" />
             <div>
               <p className="text-muted-foreground">Total Students</p>
-              <p className="text-2xl">42</p>
+              <p className="text-2xl">{totalStudents}</p>
             </div>
           </div>
         </Card>
@@ -54,8 +202,8 @@ export function DashboardOverview() {
           <div className="flex items-center space-x-2">
             <CheckCircle className="h-8 w-8 text-purple-600" />
             <div>
-              <p className="text-muted-foreground">Pending Reviews</p>
-              <p className="text-2xl">15</p>
+              <p className="text-muted-foreground">Students Over 70</p>
+              <p className="text-2xl">{(passedStudents/4).toFixed(0)}</p>
             </div>
           </div>
         </Card>
@@ -65,7 +213,7 @@ export function DashboardOverview() {
             <TrendingUp className="h-8 w-8 text-orange-600" />
             <div>
               <p className="text-muted-foreground">Class Average</p>
-              <p className="text-2xl">87%</p>
+              <p className="text-2xl">{avgMark.toFixed(2)}%</p>
             </div>
           </div>
         </Card>

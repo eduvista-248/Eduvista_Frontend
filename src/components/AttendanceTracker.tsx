@@ -22,7 +22,7 @@ import {
   Download,
   Filter
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const students = [
   {
@@ -174,10 +174,13 @@ function getTrendColor(trend: string) {
   }
 }
 
-export function AttendanceTracker() {
+export function AttendanceTracker({subjects_list}) {
+  const [classes, setClasses] = useState();
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedClass, setSelectedClass] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedSubject, setSelectedSubject] = useState();
 
   const totalStudents = students.length;
   const presentToday = students.filter(s => s.status === 'present').length;
@@ -190,6 +193,21 @@ export function AttendanceTracker() {
     if (selectedStatus !== "all" && student.status !== selectedStatus) return false;
     return true;
   });
+
+  useEffect(() => {
+    async function fetchClassess() {
+      const teacher = localStorage.getItem("teacher");
+      const teacherData = JSON.parse(teacher);
+      
+      const data = await fetch(`http://127.0.0.1:8000/api/classes/${teacherData.teacher_id}/${selectedSubject}`);
+      const response = await data.json();
+      console.log("classes the teacher ",teacherData.teacher_id, " is handling: ", response," for the subject: ",selectedSubject);
+      setClasses(response);
+
+      return response;
+    }
+    fetchClassess();
+  }, [selectedSubject])
 
   return (
     <div className="space-y-6">
@@ -280,22 +298,48 @@ export function AttendanceTracker() {
         <div className="lg:col-span-2">
           <Card className="p-6">
             <div className="flex items-center space-x-4 mb-6">
-              <div className="relative flex-1 max-w-md">
+              {/* <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input placeholder="Search students..." className="pl-10" />
-              </div>
-              
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
+              </div> */}
+                
+                {/* Subject Selection */}
+              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filter by class" />
+                  <SelectValue placeholder="Filter by subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Classes</SelectItem>
+                  {subjects_list.map((subj) => (
+                    <SelectItem key={subj.subject_id} value={String(subj.subject_id)}>
+                      {subj.subject_name}
+                    </SelectItem>
+                  ))}
+                  {/* <SelectItem value="all">All Classes</SelectItem>
                   <SelectItem value="ap-biology">AP Biology</SelectItem>
                   <SelectItem value="chemistry">Chemistry</SelectItem>
-                  <SelectItem value="environmental">Environmental Science</SelectItem>
+                  <SelectItem value="environmental">Environmental Science</SelectItem> */}
                 </SelectContent>
               </Select>
+
+                {/* Class Selection */}
+                {classes && <Select value={selectedClass} onValueChange={setSelectedClass}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by Class" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.map((cls) => (
+                    <SelectItem key={cls.class_id} value={String(cls.class_id)}>
+                      {cls.class_name}
+                    </SelectItem>
+                  ))}
+                  {/* <SelectItem value="all">All Classes</SelectItem>
+                  <SelectItem value="ap-biology">AP Biology</SelectItem>
+                  <SelectItem value="chemistry">Chemistry</SelectItem>
+                  <SelectItem value="environmental">Environmental Science</SelectItem> */}
+                </SelectContent>
+              </Select>}
+              
+              
               
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="w-32">

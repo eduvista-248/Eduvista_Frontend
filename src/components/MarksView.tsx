@@ -96,9 +96,43 @@ export default function MarksView({ subjects_list }) {
     }
   }, [selectedClass, selectedExam]);
 
+  // Initial draft of fetchMarks 
+  // useEffect(() => {
+  //   async function fetchMarks(starting_student_id) {
+  //     const data = await fetch(`http://127.0.0.1:8000/api/marks/${selectedSubject}/${starting_student_id}`);
+  //     const response = await data.json();
+  //     console.log("response: ", response);
+  //     return response;
+  //   }
+  //   console.log(selectedSubject)
+  //   const studentIds = students.map(students => students.student_id);
+  //   console.log("student ids: ", studentIds)
+  //   if (students && selectedExam) {
+      
+  //     // fetchMarks(studentIds[0]).then((allMarks) => {
+  //     // console.log(allMarks);
+  //     // let filtered = allMarks.filter(
+  //     //   (m) => String(m.subject_id) == String(selectedSubject) 
+  //     // );
+  //     // console.log("filtered: ", filtered)
+  //     // filtered = filtered.filter(
+  //     //   (m) => {
+  //     //     studentIds.includes(Number(m.student_id));
+  //     //     console.log(m.student_id)
+  //     //   }
+  //     // )
+  //     // &&
+  //     //   studentIds.includes(m.student_id)
+  //     // console.log("filtered: ", filtered)
+  //     fetchMarks(studentIds[0]).then(setMarksList);
+  //     // setMarksList(filtered);
+  //     // });
+  //   }
+  // }, [selectedExam, students])
+
   useEffect(() => {
-    async function fetchMarks(starting_student_id) {
-      const data = await fetch(`http://127.0.0.1:8000/api/marks/${selectedSubject}/${starting_student_id}`);
+    async function fetchMarks() {
+      const data = await fetch(`http://127.0.0.1:8000/api/marks/${selectedSubject}/${selectedClass}/${selectedExam}`);
       const response = await data.json();
       console.log("response: ", response);
       return response;
@@ -107,25 +141,7 @@ export default function MarksView({ subjects_list }) {
     const studentIds = students.map(students => students.student_id);
     console.log("student ids: ", studentIds)
     if (students && selectedExam) {
-      
-      // fetchMarks(studentIds[0]).then((allMarks) => {
-      // console.log(allMarks);
-      // let filtered = allMarks.filter(
-      //   (m) => String(m.subject_id) == String(selectedSubject) 
-      // );
-      // console.log("filtered: ", filtered)
-      // filtered = filtered.filter(
-      //   (m) => {
-      //     studentIds.includes(Number(m.student_id));
-      //     console.log(m.student_id)
-      //   }
-      // )
-      // &&
-      //   studentIds.includes(m.student_id)
-      // console.log("filtered: ", filtered)
-      fetchMarks(studentIds[0]).then(setMarksList);
-      // setMarksList(filtered);
-      // });
+      fetchMarks().then(setMarksList);
     }
   }, [selectedExam, students])
 
@@ -174,7 +190,7 @@ export default function MarksView({ subjects_list }) {
             <SelectValue placeholder="Choose a subject" />
           </SelectTrigger>
           <SelectContent>
-            {subjects_list.map((subj) => (
+            {subjects_list && subjects_list.map((subj) => (
               <SelectItem key={subj.subject_id} value={String(subj.subject_id)}>
                 {subj.subject_name}
               </SelectItem>
@@ -216,7 +232,7 @@ export default function MarksView({ subjects_list }) {
             </SelectTrigger>
             <SelectContent>
               {exams.map((exam) => (
-                <SelectItem key={exam.exam_id} value={String(exam.exam_id)}>
+                <SelectItem key={exam.exam_id} value={String(exam.exam_type)}>
                   {exam.exam_type}
                 </SelectItem>
               ))}
