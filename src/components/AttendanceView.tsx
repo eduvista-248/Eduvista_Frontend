@@ -47,7 +47,7 @@ export function AttendanceView({ my_class_id }) {
       try {
         const formattedDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
         console.log("formattedDate: ",formattedDate)
-        const res = await fetch(`http://127.0.0.1:8000/api/api/myclass/students/${my_class_id}/?date=${formattedDate}`);
+        const res = await fetch(`http://127.0.0.1:8000/api/myclass/students/${my_class_id}/?date=${formattedDate}`);
         const data = await res.json();
         console.log(data);
         setStudents(data.students || []);

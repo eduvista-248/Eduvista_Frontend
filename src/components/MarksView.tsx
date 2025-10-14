@@ -60,6 +60,8 @@ export default function MarksView({ subjects_list }) {
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedExam, setSelectedExam] = useState<string>("");
 
+  console.log("✅MarksView rendered");
+  console.log(subjects_list);
   useEffect(() => {
     async function fetchClassess() {
       const teacher = localStorage.getItem("teacher");
@@ -74,6 +76,7 @@ export default function MarksView({ subjects_list }) {
     setExams([
       { exam_id: 1, exam_type: "Midterm" },
       { exam_id: 2, exam_type: "Final" },
+      { exam_id: 3, exam_type: "Unit" },
     ]);
     fetchClassess();
   }, [selectedSubject]);
@@ -143,7 +146,7 @@ export default function MarksView({ subjects_list }) {
     if (students && selectedExam) {
       fetchMarks().then(setMarksList);
     }
-  }, [selectedExam, students])
+  }, [selectedExam, students, selectedSubject])
 
   //   useEffect(() => {
   //   async function fetchMarks(starting_student_id) {
@@ -254,7 +257,7 @@ export default function MarksView({ subjects_list }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {marksList.map((s) => {
+              {marksList && marksList.map((s) => {
                 const student = students.find(stu => stu.student_id === s.student_id);
                 {console.log("student: ", student)}
                 return (

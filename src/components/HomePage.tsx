@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, } from "./ui/sidebar";
 import { DashboardOverview } from "./DashboardOverview";
 import { useLocation } from "react-router-dom";
@@ -52,11 +52,11 @@ const navigationItems = [
     icon: BookOpen,
     id: "assignments"
   },
-  {
-    title: "Attendance",
-    icon: UserCheck,
-    id: "attendance"
-  },
+  // {
+  //   title: "Attendance",
+  //   icon: UserCheck,
+  //   id: "attendance"
+  // },
   {
     title: "Reports",
     icon: FileText,
@@ -131,67 +131,60 @@ export default function HomePage({teacher}) {
   const [classes, setClasses] = useState<Class[]>();
 
   const baseURL = 'https://eduvista-backend-render.onrender.com';
+  console.log("🔁 HomePage render");
 
   console.log("from homepage: ", teacher)
   useEffect(() => {
-    async function loginAndFetch(email, password) {
-    const access_token = localStorage.getItem("access_token");
-    await fetchSubjects(teacher.teacher_id, access_token);
-
-    return data;
-  }
-
-  async function fetchSubjects(teacher_id, token) {
-    // Fetch subjects
-    // const subjectRes = await fetch(`http://127.0.0.1:8000/api/subjects/${teacher_id}/`, {
-    const subjectRes = await fetch(`${baseURL}/api/subjects/${teacher_id}/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const subjectsData = await subjectRes.json();
-    console.log("subjectsData: ", subjectsData)
-    setSubjects(subjectsData);
-
-    // Fetch classes
-    // const classRes = await fetch(`http://127.0.0.1:8000/api/classes/${teacher_id}/`, {
-    //   headers: { Authorization: `Bearer ${token}` },
-    // });
-    // const classesData = await classRes.json();
-    // setClasses(classesData);
-  }
-
-  async function init() {
-    const token = localStorage.getItem("access_token");
-    const teacher = localStorage.getItem("teacher");
-
-    if (token && teacher) {
-      const teacherObj = JSON.parse(teacher);
-      setTeacherDetails(teacherObj);
-      console.log("From init useEffect: ", teacherObj.teacher_id);
-      await fetchSubjects(teacherObj.teacher_id, token);
-    } else {
-      // If no tokens → login
-      localStorage.clear();
-      window.location.href = '/';
+    async function fetchSubjects(teacher_id, token) {
+      // Fetch subjects
+      const subjectRes = await fetch(`http://127.0.0.1:8000/api/subjects/${teacher_id}/`, {
+      // const subjectRes = await fetch(`${baseURL}/api/subjects/${teacher_id}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const subjectsData = await subjectRes.json();
+      console.log("subjectsData: ", subjectsData);
+      console.log("inside the fetchSubjects function");
+      setSubjects(subjectsData);
     }
-  }
 
-  init();
-}, []);
+    async function init() {
+      const token = localStorage.getItem("access_token");
+      const teacher = localStorage.getItem("teacher");
 
+      if (token && teacher) {
+        const teacherObj = JSON.parse(teacher);
+        setTeacherDetails(teacherObj);
+        console.log("From init useEffect: ", teacherObj.teacher_id);
+        await fetchSubjects(teacherObj.teacher_id, token);
+      } else {
+        // If no tokens → login
+        localStorage.clear();
+        window.location.href = '/';
+      }
+    }
+
+    init();
+  }, []);
+
+  const memoizedTeacher = useMemo(() => teacherDetails, [teacherDetails]);
+  const memoizedSubjects = useMemo(() => subjects, [subjects]);
+  
   const renderContent = () => {
     {teacherDetails && console.log("from HomePage: ",teacherDetails)}
     switch (activeTab) {
       case "dashboard":
         return teacherDetails ? (
-          <DashboardOverview my_class_id={teacher.my_class} teacher_id={teacher.teacher_id} />
+          <DashboardOverview my_class_id={memoizedTeacher.my_class} teacher_id={memoizedTeacher.teacher_id} />
         ) : (
           <div>Loading...</div>
         );
       case "students-marks":
         return (<>
           <>
+            {/* {subjects && <MarksView subjects_list={subjects} />}
+            {subjects && <MarksSection subjects_list={subjects} />} */}
             <MarksView subjects_list={subjects} />
-            <MarksSection subjects_list={subjects} />
+            <MarksSection subjects_list={memoizedSubjects} />
           </>
         </>);
       case "students-attendance":
@@ -204,7 +197,7 @@ export default function HomePage({teacher}) {
       // case "attendance":
       //   return <AttendanceTracker subjects_list={subjects} />;
       case "reports":
-        return <ReportGeneration />;
+        return <ReportGeneration my_class_id = {teacher.my_class} />;
       case "substitute":
         return <TeacherSubstitute />;
       case "activity":

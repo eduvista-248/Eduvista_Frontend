@@ -51,6 +51,7 @@ export default function MarksSection({ subjects_list }) {
   // Mock API calls (replace with real backend fetches)
   console.log(subjects_list);
 
+  console.log("✅MarksSection rendered");
   const teacher = localStorage.getItem("teacher");
   const teacherData = JSON.parse(teacher);
   console.log(teacherData);
@@ -106,6 +107,7 @@ export default function MarksSection({ subjects_list }) {
     setExams([
       { exam_id: 1, exam_type: "Midterm" },
       { exam_id: 2, exam_type: "Final" },
+      { exam_id: 3, exam_type: "Unit" },
     ]);
     fetchClassess();
   }, [selectedSubject]);
@@ -281,8 +283,8 @@ export default function MarksSection({ subjects_list }) {
                 />
               </div>
             ))} */}
-            {console.log(marksList)};
-            {marksList.map((s) => {
+            {console.log(marksList)}
+            {marksList && marksList.map((s) => {
               const student = students.find(stu => stu.student_id === s.student_id);
               return (
               <div
@@ -290,7 +292,7 @@ export default function MarksSection({ subjects_list }) {
                 className="flex items-center justify-between border p-3 rounded-lg"
               >
                 <p className="font-medium">
-                  {student.first_name} {student.last_name}
+                  {student ? `${student.first_name} ${student.last_name}` : "Unknown Student"}
                 </p>
                 <p className="font-medium">{s.marks}</p>
                 <Input
