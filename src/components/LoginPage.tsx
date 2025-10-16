@@ -47,7 +47,7 @@ export default function LoginPage() {
   return (
     <div id="login-wrapper">
       <div className="login-container">
-        <h1>EduVista</h1>
+        <h1>AEVAM</h1>
         <p>Welcome back! Please login to continue.</p>
 
         <form onSubmit={handleSubmit}>

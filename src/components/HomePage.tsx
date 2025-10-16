@@ -183,8 +183,8 @@ export default function HomePage({teacher}) {
           <>
             {/* {subjects && <MarksView subjects_list={subjects} />}
             {subjects && <MarksSection subjects_list={subjects} />} */}
-            <MarksView subjects_list={subjects} />
-            <MarksSection subjects_list={memoizedSubjects} />
+            <MarksView subjects_list={subjects} my_class_id={teacher.my_class} />
+            <MarksSection subjects_list={memoizedSubjects} my_class_id={teacher.my_class} />
           </>
         </>);
       case "students-attendance":
@@ -237,7 +237,7 @@ export default function HomePage({teacher}) {
                 <GraduationCap className="h-6 w-6" />
               </div>
               <div>
-                <h2>EduDash</h2>
+                <h2>AEVAM</h2>
                 <p className="text-xs text-muted-foreground">Teacher Portal</p>
               </div>
             </div>

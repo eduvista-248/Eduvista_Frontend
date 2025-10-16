@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Save } from "lucide-react";
+import updateImage from '../assets/updateMarks.png';
 
 
 type Student = {
@@ -35,7 +36,7 @@ type Subject = {
   subject_name: string
 }
 
-export default function MarksSection({ subjects_list }) {
+export default function MarksSection({ subjects_list, my_class_id }) {
   const [classes, setClasses] = useState<Class[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
   const [students, setStudents] = useState<any>([]);
@@ -114,7 +115,7 @@ export default function MarksSection({ subjects_list }) {
   
   useEffect(() => {
     async function fetchStudents() {
-      const data = await fetch("http://127.0.0.1:8000/api/students/");
+      const data = await fetch(`http://127.0.0.1:8000/api/students/${my_class_id}`);
       const response = await data.json();
       console.log("response: ", response);
       return response;
@@ -193,8 +194,10 @@ export default function MarksSection({ subjects_list }) {
 
   return (
     <Card className="p-6 space-y-6">
-      <h3 className="mb-4 text-lg font-semibold">Marks Management</h3>
-
+      <div style={{display: "flex", flexDirection:"row", alignItems: "center", gap: "10px"}}>
+        <img src={updateImage} className="h-10 w-10" alt="" />
+        <h3 className="text-lg font-semibold" style={{display: "flex", alignItems: "center"}}>Marks Management</h3>
+      </div>
       {/* Subject Selection */}
       
       <div>

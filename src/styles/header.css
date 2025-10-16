@@ -1,0 +1,23 @@
+#logoContainer{
+    width: 200px;
+}
+
+button#menu-button{
+    display: none;
+}
+
+#navBar{
+    gap: 21px;
+}
+
+@media screen and (max-width: 600px) {
+    #logoContainer{
+        width: 150px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    button#menu-button{
+        display: flex;
+    }
+}

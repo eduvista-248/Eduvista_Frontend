@@ -5,6 +5,8 @@ import { Avatar } from "./components/ui/avatar";
 import { Badge } from "./components/ui/badge";
 import HomePage from "./components/HomePage";
 import LoginPage from "./components/LoginPage";
+import {Header} from "./components/Header";
+import { HomeLogin } from "./components/HomeLogin";
 import { 
   LayoutDashboard, 
   Users, 
@@ -24,6 +26,7 @@ import MarksView from "./components/MarksView";
 import { AttendanceView } from "./components/AttendanceView";
 
 import "./styles/App.css"
+import { AboutUs } from "./components/AboutUs";
 
 
 
@@ -55,7 +58,15 @@ export default function App() {
 
   // Conditional render
   if (!teacherDetails || !token) {
-    return <LoginPage />;
+    return (
+      <>
+        <Header />
+        {/* <LoginPage /> */}
+
+        <div id="home"><HomeLogin /></div>
+        <AboutUs />
+      </>
+    )
   }
 
   return <HomePage teacher={teacherDetails} />;

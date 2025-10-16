@@ -150,7 +150,8 @@ export function ReportGeneration({ my_class_id }) {
       // Run all fetch requests in parallel
       const responses = await Promise.all(
         selectedStudents.map(async (student) => {
-          const res = await fetch(`http://127.0.0.1:8000/api/report_card/${student}`);
+          // const res = await fetch(`http://127.0.0.1:8000/api/report_card/${student}`);
+          const res = await fetch(`http://127.0.0.1:8000/api/gen/${student}`);
           if (!res.ok) {
             throw new Error(`Failed to fetch report for ${student}`);
           }
@@ -333,7 +334,7 @@ export function ReportGeneration({ my_class_id }) {
                           }
                         }}
                       />
-                      <Label htmlFor={student} className="text-sm">{student.first_name} {student.last_name}</Label>
+                      <Label htmlFor={student.student_id} className="text-sm">{student.first_name} {student.last_name}</Label>
                     </div>
                   ))}
                 </div>

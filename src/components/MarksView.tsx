@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import marksImage from '../assets/viewMarks.png';
 
 type Student = {
   student_id: number,
@@ -50,7 +51,7 @@ type Mark = {
   subject_id: string
 }
 
-export default function MarksView({ subjects_list }) {
+export default function MarksView({ subjects_list, my_class_id }) {
   const [classes, setClasses] = useState<Class[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
   const [marksList, setMarksList] = useState<Mark[]>([]);
@@ -83,13 +84,14 @@ export default function MarksView({ subjects_list }) {
   
   useEffect(() => {
     async function fetchStudents() {
-      const data = await fetch("http://127.0.0.1:8000/api/students/");
+      const data = await fetch(`http://127.0.0.1:8000/api/students/${my_class_id}`);
       const response = await data.json();
       console.log("response: ", response);
       return response;
     }
     if (selectedClass && selectedExam) {
       fetchStudents().then((allStudents) => {
+        console.log("all students: ", allStudents)
       const filtered = allStudents.filter(
         (s) => s.class_id == selectedClass
       );
@@ -183,8 +185,10 @@ export default function MarksView({ subjects_list }) {
 
   return (
     <Card className="p-6 space-y-6">
-      <h3 className="mb-4 text-lg font-semibold">View Marks</h3>
-
+      <div style={{display: "flex", flexDirection:"row", alignItems: "center", gap: "10px"}}>
+        <img src={marksImage} className="h-10 w-10" alt="" />
+        <h3 className="text-lg font-semibold" style={{display: "flex", alignItems: "center"}}>View Marks</h3>
+      </div>
       {/* Subject Selection */}
       <div>
         <p className="mb-2 font-medium">Select Subject</p>
@@ -258,11 +262,12 @@ export default function MarksView({ subjects_list }) {
             </TableHeader>
             <TableBody>
               {marksList && marksList.map((s) => {
-                const student = students.find(stu => stu.student_id === s.student_id);
+                const student = students.find(stu => stu.student_id == s.student_id);
                 {console.log("student: ", student)}
+                {console.log("students: ", students)}
                 return (
                 <TableRow key={s.student_id}>
-                  <TableCell>{student ? `${student.first_name} ${student.last_name}` : "Unknown Student"}</TableCell>
+                  <TableCell>{student ? `${student.first_name}` : "Unknown Student"}</TableCell>
                   <TableCell>{s.marks}</TableCell>
                   <TableCell>{s.max_marks}</TableCell>
                 </TableRow>)

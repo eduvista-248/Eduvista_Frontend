@@ -98,7 +98,7 @@ export function DashboardOverview({ my_class_id, teacher_id }) {
       }
 
       if (students && subjectId) {
-        fetchMarks().then(setMarksList);
+        // fetchMarks().then(setMarksList);
         getGrades().then(setGradesList);
       }
     }, [my_class_id, students, subjectId])
@@ -201,10 +201,10 @@ export function DashboardOverview({ my_class_id, teacher_id }) {
 
   useEffect(() => {
     gradeDistribution = Object.entries(gradeCounts).map(([grade, count]) => ({
-    grade,
-    count
-  }));
-  console.log("gradeDistribution: ", gradeDistribution)
+      grade,
+      count
+    }));
+    console.log("gradeDistribution: ", gradeDistribution)
   }, [gradeCounts])
 
   const totalStudents = students ? students.length : 0;
