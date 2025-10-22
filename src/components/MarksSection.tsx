@@ -6,19 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Save } from "lucide-react";
 import updateImage from '../assets/updateMarks.png';
 
-
-type Student = {
-  student_id: number,
-  first_name: string,
-  last_name: string,
-  DOB: Date,
-  class_id: number,
-  parent_id: number,
-  gender: string,
-  address: string,
-  created_at: Date
-}
-
 type Class = {
   class_id: number,
   class_name: string,
@@ -30,11 +17,6 @@ type Exam = {
   exam_id: number;
   exam_type: string;
 };
-
-type Subject = {
-  subject_id: string,
-  subject_name: string
-}
 
 export default function MarksSection({ subjects_list, my_class_id }) {
   const [classes, setClasses] = useState<Class[]>([]);
@@ -48,6 +30,8 @@ export default function MarksSection({ subjects_list, my_class_id }) {
   const [selectedExamId, setSelectedExamId] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [marks, setMarks] = useState<Record<number, string>>({});
+
+  const baseURL = 'http://127.0.0.1:8000';
 
   // Mock API calls (replace with real backend fetches)
   console.log(subjects_list);
@@ -99,7 +83,7 @@ export default function MarksSection({ subjects_list, my_class_id }) {
       const teacher = localStorage.getItem("teacher");
       const teacherData = JSON.parse(teacher);
       
-      const data = await fetch(`http://127.0.0.1:8000/api/classes/${teacherData.teacher_id}/${selectedSubject}`);
+      const data = await fetch(`${baseURL}/api/classes/${teacherData.teacher_id}/${selectedSubject}`);
       const response = await data.json();
       console.log("classes the teacher ",teacherData.teacher_id, " is handling: ", response," for the subject: ",selectedSubject);
       setClasses(response);
@@ -115,7 +99,7 @@ export default function MarksSection({ subjects_list, my_class_id }) {
   
   useEffect(() => {
     async function fetchStudents() {
-      const data = await fetch(`http://127.0.0.1:8000/api/students/${my_class_id}`);
+      const data = await fetch(`${baseURL}/api/students/${my_class_id}`);
       const response = await data.json();
       console.log("response: ", response);
       return response;
@@ -133,7 +117,7 @@ export default function MarksSection({ subjects_list, my_class_id }) {
 
     useEffect(() => {
       async function fetchMarks() {
-        const data = await fetch(`http://127.0.0.1:8000/api/marks/${selectedSubject}/${selectedClass}/${selectedExam}`);
+        const data = await fetch(`${baseURL}/api/marks/${selectedSubject}/${selectedClass}/${selectedExam}`);
         const response = await data.json();
         console.log("response: ", response);
         return response;
@@ -145,7 +129,7 @@ export default function MarksSection({ subjects_list, my_class_id }) {
         console.log("inside the conditinal for updating marks")
         fetchMarks().then(setMarksList);
       }
-    }, [selectedExam, students])
+    }, [selectedExam, students, selectedSubject])
 
   const handleMarksChange = async (id: number, subject: string, exam:string,value: string) => {
     setMarks((prev) => ({ ...prev, [id]: value }));
@@ -169,7 +153,7 @@ export default function MarksSection({ subjects_list, my_class_id }) {
     };
     console.log(payload);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/marks_update/", {
+      const response = await fetch(`${baseURL}/api/marks_update/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -198,71 +182,71 @@ export default function MarksSection({ subjects_list, my_class_id }) {
         <img src={updateImage} className="h-10 w-10" alt="" />
         <h3 className="text-lg font-semibold" style={{display: "flex", alignItems: "center"}}>Marks Management</h3>
       </div>
-      {/* Subject Selection */}
-      
-      <div>
-        <p className="mb-2 font-medium">Select Subject</p>
-        <Select onValueChange={(v) => setSelectedSubject(v)}>
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Choose a subject" />
-          </SelectTrigger>
-          <SelectContent>
-            {subjects_list.map((sub) => (
-              <SelectItem key={sub.subject_id} value={String(sub.subject_id)}>
-                {sub.subject_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
-      {/* Class Selection */}
-      {selectedSubject && (
+      <div className="flex gap-8" style={{flexWrap: "wrap"}}>
+        {/* Subject Selection */}
+        
         <div>
-        <p className="mb-2 font-medium">Select Class</p>
-        <Select onValueChange={(v) => setSelectedClass(v)}>
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Choose a class" />
-          </SelectTrigger>
-          {console.log(classes)}
-          <SelectContent>
-            {classes.map((cls) => (
-              <SelectItem key={cls.class_id} value={String(cls.class_id)}>
-                 {cls.class_name}
-                 {/* {cls.class_id} */}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      )}
-
-      
-
-      {/* Exam Selection */}
-      {selectedClass && (
-        <div>
-          <p className="mb-2 font-medium">Select Exam</p>
-          {/* <Select onValueChange={(v) => setSelectedExam(v)}> */}
-          <Select onValueChange={(v) => {
-            const [exam_type, exam_id] = v.split('|');
-            setSelectedExam(exam_type);
-            setSelectedExamId(exam_id);
-          }}>
+          <p className="mb-2 font-medium">Select Subject</p>
+          <Select onValueChange={(v) => setSelectedSubject(v)}>
             <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Choose an exam" />
+              <SelectValue placeholder="Choose a subject" />
             </SelectTrigger>
             <SelectContent>
-              {exams.map((exam) => (
-                <SelectItem key={exam.exam_id} value={`${exam.exam_type}|${exam.exam_id}`}>
-                  {exam.exam_type}
+              {subjects_list.map((sub) => (
+                <SelectItem key={sub.subject_id} value={String(sub.subject_id)}>
+                  {sub.subject_name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-      )}
 
+        {/* Class Selection */}
+        {selectedSubject && (
+          <div>
+          <p className="mb-2 font-medium">Select Class</p>
+          <Select onValueChange={(v) => setSelectedClass(v)}>
+            <SelectTrigger className="w-[250px]">
+              <SelectValue placeholder="Choose a class" />
+            </SelectTrigger>
+            {console.log(classes)}
+            <SelectContent>
+              {classes.map((cls) => (
+                <SelectItem key={cls.class_id} value={String(cls.class_id)}>
+                  {cls.class_name}
+                  {/* {cls.class_id} */}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        )}
+
+        {/* Exam Selection */}
+        {selectedClass && (
+          <div>
+            <p className="mb-2 font-medium">Select Exam</p>
+            {/* <Select onValueChange={(v) => setSelectedExam(v)}> */}
+            <Select onValueChange={(v) => {
+              const [exam_type, exam_id] = v.split('|');
+              setSelectedExam(exam_type);
+              setSelectedExamId(exam_id);
+            }}>
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Choose an exam" />
+              </SelectTrigger>
+              <SelectContent>
+                {exams.map((exam) => (
+                  <SelectItem key={exam.exam_id} value={`${exam.exam_type}|${exam.exam_id}`}>
+                    {exam.exam_type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
       {/* Students List + Marks Entry */}
       {selectedClass && selectedExam && (
         <div>

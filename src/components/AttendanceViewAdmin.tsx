@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Calendar as CalendarIcon, 
   Users, 
@@ -38,16 +39,35 @@ function getStatusIcon(status: string) {
   }
 }
 
-export function AttendanceView({ my_class_id }) {
+export function AttendanceViewAdmin() {
   const [students, setStudents] = useState<any[]>([]);
+  const [selectedClass, setSelectedClass] = useState();
+  const [classes, setClasses] = useState([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date("2024-12-31"));
+
+  const baseURL = "http://localhost:8000";
+
+  useEffect(() => {
+      async function fetchClasses() {
+        try{
+          const res = await fetch(`${baseURL}/api/classesAdmin`);
+          const data = await res.json();
+          console.log("Fetched classes data:", data);
+          setClasses(data);
+        }
+        catch(error){
+          console.log("Error fetching classes data:", error);
+        }
+      }
+      fetchClasses();
+    }, [])
 
   useEffect(() => {
     async function fetchAttendance() {
       try {
         const formattedDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
         console.log("formattedDate: ",formattedDate)
-        const res = await fetch(`http://127.0.0.1:8000/api/myclass/students/${my_class_id}/?date=${formattedDate}`);
+        const res = await fetch(`${baseURL}/api/myclass/students/${selectedClass}/?date=${formattedDate}`);
         const data = await res.json();
         console.log(data);
         setStudents(data.students || []);
@@ -56,7 +76,7 @@ export function AttendanceView({ my_class_id }) {
       }
     }
     fetchAttendance();
-  }, [my_class_id, selectedDate]);
+  }, [selectedClass, selectedDate]);
 
   const totalStudents = students.length;
   const presentToday = students.filter((s) => s.attendance[0]?.status === "Present").length;
@@ -139,11 +159,27 @@ export function AttendanceView({ my_class_id }) {
 
       {/* Student Attendance Table */}
       <Card className="p-6">
+        <div>
+            <p className="mb-2 font-medium">Select Class</p>
+            <Select onValueChange={(v) => {
+            setSelectedClass(v);
+            }}>
+            <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Choose a subject" />
+            </SelectTrigger>
+            <SelectContent>
+                {classes && classes.map((cl) => (
+                <SelectItem key={cl.class_id} value={String(cl.class_id)}>
+                    {cl.class_name}
+                </SelectItem>
+                ))}
+            </SelectContent>
+            </Select>
+        </div>
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList>
+          {/* <TabsList>
             <TabsTrigger value="today">Today's Attendance</TabsTrigger>
-            {/* <TabsTrigger value="summary">Summary View</TabsTrigger> */}
-          </TabsList>
+          </TabsList> */}
 
           {/* Today */}
           <TabsContent value="today">

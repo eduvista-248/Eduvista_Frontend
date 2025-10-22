@@ -23,13 +23,22 @@ import {
   GraduationCap,
   UserCheck,
   FileText,
-  UserCog
+  UserCog,
+  IndianRupee
 } from "lucide-react";
 import MarksSection from "./MarksSection";
 import MarksView from "./MarksView";
 import { AttendanceView } from "./AttendanceView";
 // import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabseClient';
+import { StaffList } from "./StaffList";
+import { SubjectsList } from "./SubjectsList";
+import { StudentList } from "./StudentList";
+import MarksViewAdmin from "./MarksViewAdmin";
+import { AttendanceViewAdmin } from "./AttendanceViewAdmin";
+import { UpcomingDues } from "./UpcomingDues";
+import { PaymentHistory } from "./PaymentHistory";
+import { Transport } from "./Transport";
 
 const navigationItems = [
   {
@@ -38,19 +47,25 @@ const navigationItems = [
     id: "dashboard"
   },
   {
+    title: "Staff",
+    icon: UserCheck,
+    id: "staff",
+    children: [
+      { title: "Staff-list", id: "staff-list" },
+      { title: "Attendance", id: "staff-attendance" },
+      { title: "Subjects", id: "staff-subjects" }
+    ]
+  },
+  {
     title: "Students",
     icon: Users,
     id: "students",
     children: [
-      { title: "Marks", id: "students-marks" },
+      { title: "Students-list", id: "students-list" },
       { title: "Attendance", id: "students-attendance" },
-      { title: "Class-wise TT", id: "students-TT" }
+      { title: "Marks", id: "students-marks" },
+      { title: "Transport", id: "students-transport" }
     ]
-  },
-  {
-    title: "Assignments",
-    icon: BookOpen,
-    id: "assignments"
   },
   // {
   //   title: "Attendance",
@@ -63,9 +78,13 @@ const navigationItems = [
     id: "reports"
   },
   {
-    title: "Substitute",
-    icon: UserCog,
-    id: "substitute"
+    title: "Fee Management",
+    icon: IndianRupee,
+    id: "fee-management",
+    children: [
+      { title: "Upcoming Dues", id: "upcoming-dues" },
+      { title: "Payment History", id: "payment-history" }
+    ]
   },
   {
     title: "Recent Activity",
@@ -123,7 +142,7 @@ type Subject = {
   subject_name: string
 }
 
-export default function HomePage({teacher}) {
+export default function HomePageAdmin({teacher}) {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [teacherDetails, setTeacherDetails] = useState<Teacher>(null);
@@ -179,28 +198,30 @@ export default function HomePage({teacher}) {
         ) : (
           <div>Loading...</div>
         );
-      case "students-marks":
-        return (<>
-          <>
-            {/* {subjects && <MarksView subjects_list={subjects} />}
-            {subjects && <MarksSection subjects_list={subjects} />} */}
-            <MarksView subjects_list={subjects} my_class_id={teacher.my_class} />
-            <MarksSection subjects_list={memoizedSubjects} my_class_id={teacher.my_class} />
-          </>
-        </>);
-      case "students-attendance":
+      case "staff-list":
+        return <StaffList />;
+      case "staff-attendance":
         // return <AttendanceTracker subjects_list={subjects} />;
-        return <AttendanceView my_class_id={teacher.my_class} />
-      case "students-TT":
-        return (<>Student Time-Table</>);
-      case "assignments":
-        return <AssignmentTracker />;
+        // return <AttendanceView my_class_id={teacher.my_class} />
+        return (<>staff-attendance</>);
+      case "staff-subjects":
+        return <SubjectsList />;
+      case "students-list":
+        return <StudentList />;
       // case "attendance":
       //   return <AttendanceTracker subjects_list={subjects} />;
-      case "reports":
-        return <ReportGeneration my_class_id = {teacher.my_class} />;
-      case "substitute":
-        return <TeacherSubstitute />;
+      case "students-attendance":
+        // return <ReportGeneration my_class_id = {teacher.my_class} />;
+        // return <AttendanceView my_class_id={memoizedTeacher.my_class} />
+        return <AttendanceViewAdmin />;
+      case "students-marks":
+        return <MarksViewAdmin />
+      case "students-transport":
+        return <Transport />
+      case "upcoming-dues":
+        return <UpcomingDues />;
+      case "payment-history":
+        return <PaymentHistory />;
       case "activity":
         return <RecentActivity />;
       case "calendar":
@@ -239,7 +260,7 @@ export default function HomePage({teacher}) {
               </div>
               <div>
                 <h2>AEVAM</h2>
-                <p className="text-xs text-muted-foreground">Teacher Portal</p>
+                <p className="text-xs text-muted-foreground">Admin Portal</p>
               </div>
             </div>
           </SidebarHeader>

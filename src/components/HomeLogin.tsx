@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import LoginPage from "./LoginPage";
+import LoginAdmin from "./LoginAdmin";
 
 const reportTypes = [
   {
@@ -49,7 +50,7 @@ const reportTypes = [
     description: "Click to access admin portal",
     icon: Users,
     color: "text-blue-600",
-    type: "disable"
+    type: "enable"
   },
   {
     id: "student-login",
@@ -74,6 +75,18 @@ export function HomeLogin() {
 
   if (selectedType == "teacher-login") {
     return <LoginPage />;
+  }
+  switch (selectedType) {
+    case "teacher-login":
+      return <LoginPage />;
+    case "parent-login":
+      return <LoginPage />;
+    case "admin-login":
+      return <LoginAdmin />;
+    case "student-login":
+      return <LoginPage />;
+    default:
+      break;
   }
 
   return (

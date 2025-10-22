@@ -38,57 +38,59 @@ function getStatusIcon(status: string) {
   }
 }
 
-export function AttendanceView({ my_class_id }) {
-  const [students, setStudents] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date("2024-12-31"));
+export function SubjectsList(){
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const baseURL = "http://localhost:8000";
+
 
   useEffect(() => {
-    async function fetchAttendance() {
-      try {
-        const formattedDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
-        console.log("formattedDate: ",formattedDate)
-        const res = await fetch(`http://127.0.0.1:8000/api/myclass/students/${my_class_id}/?date=${formattedDate}`);
-        const data = await res.json();
-        console.log(data);
-        setStudents(data.students || []);
-      } catch (err) {
-        console.error("Error fetching attendance:", err);
-      }
+    async function fetchStaff () {
+        try{
+            const res = await fetch(`${baseURL}/api/subjectsAdmin`);
+            const data = await res.json();
+            console.log("Fetched subjects data:", data);
+            setSubjects(data);
+        }
+        catch(error){
+            console.error("Error fetching subjects data:", error);
+        }
     }
-    fetchAttendance();
-  }, [my_class_id, selectedDate]);
+    fetchStaff();
+  }, [])
 
-  const totalStudents = students.length;
-  const presentToday = students.filter((s) => s.attendance[0]?.status === "Present").length;
-  const absentToday = students.filter((s) => s.attendance[0]?.status === "Absent").length;
-  const lateToday = students.filter((s) => s.attendance[0]?.status === "Leave").length;
-  const holidayToday = students.filter((s) => s.attendance[0]?.status === "Holiday").length;
+  const totalSubjects = subjects ? subjects.length : 0;
+  console.log("Number of subjects fetched:", totalSubjects);
+//   const presentToday = students.filter((s) => s.attendance[0]?.status === "Present").length;
+//   const absentToday = students.filter((s) => s.attendance[0]?.status === "Absent").length;
+//   const lateToday = students.filter((s) => s.attendance[0]?.status === "Leave").length;
+//   const holidayToday = students.filter((s) => s.attendance[0]?.status === "Holiday").length;
 
   return (
     <div className="space-y-6">
       {/* Header with Date Picker */}
       <div className="flex items-center justify-between">
         <div>
-          <h1>Attendance Tracker</h1>
+          <h1>Courses Offered</h1>
           <p className="text-muted-foreground">
-            Monitor and manage student attendance for {selectedDate.toDateString()}
+            {/* Monitor and manage staff attendance for {selectedDate.toDateString()} */}
+            Monitor and manage Courses Offered
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              {/* <Button variant="outline">
                 <CalendarIcon className="h-4 w-4 mr-2" />
                 {selectedDate.toDateString()}
-              </Button>
+              </Button> */}
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
+              {/* <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
                 initialFocus
-              />
+              /> */}
             </PopoverContent>
           </Popover>
           <Button>
@@ -102,46 +104,50 @@ export function AttendanceView({ my_class_id }) {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="p-4 flex flex-row-reverse items-center justify-between">
           <div>
-            <p className="text-muted-foreground">Total Students</p>
-            <p className="text-2xl">{totalStudents}</p>
+            <p className="text-muted-foreground">Total Courses Offered</p>
+            <p className="text-2xl">{totalSubjects}</p>
           </div>
           <Users className="h-8 w-8 text-blue-600" />
         </Card>
         <Card className="p-4 flex flex-row-reverse items-center justify-between">
           <div>
             <p className="text-muted-foreground">Present</p>
-            <p className="text-2xl">{presentToday}</p>
+            {/* <p className="text-2xl">{presentToday}</p> */}
+            <p className="text-2xl">yet to be added</p>
           </div>
           <CheckCircle className="h-8 w-8 text-green-600" />
         </Card>
         <Card className="p-4 flex flex-row-reverse items-center justify-between">
           <div>
             <p className="text-muted-foreground">Absent</p>
-            <p className="text-2xl">{absentToday}</p>
+            {/* <p className="text-2xl">{absentToday}</p> */}
+            <p className="text-2xl">yet to be added</p>
           </div>
           <XCircle className="h-8 w-8 text-red-600" />
         </Card>
         <Card className="p-4 flex flex-row-reverse items-center justify-between">
           <div>
             <p className="text-muted-foreground">Leave</p>
-            <p className="text-2xl">{lateToday}</p>
+            {/* <p className="text-2xl">{lateToday}</p> */}
+            <p className="text-2xl">yet to be added</p>
           </div>
           <Clock className="h-8 w-8 text-yellow-600" />
         </Card>
         <Card className="p-4 flex flex-row-reverse items-center justify-between">
           <div>
             <p className="text-muted-foreground">Holiday</p>
-            <p className="text-2xl">{holidayToday}</p>
+            {/* <p className="text-2xl">{holidayToday}</p> */}
+            <p className="text-2xl">yet to be added</p>
           </div>
           <Clock className="h-8 w-8 text-yellow-600" />
         </Card>
       </div>
 
-      {/* Student Attendance Table */}
+      {/* Staff List Table */}
       <Card className="p-6">
         <Tabs defaultValue="today" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="today">Today's Attendance</TabsTrigger>
+            <TabsTrigger value="today">Course List</TabsTrigger>
             {/* <TabsTrigger value="summary">Summary View</TabsTrigger> */}
           </TabsList>
 
@@ -150,35 +156,38 @@ export function AttendanceView({ my_class_id }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Course Id</TableHead>
+                  <TableHead>Course Name</TableHead>
+                  <TableHead>Teacher Ids</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students.map((s) => (
-                  <TableRow key={s.student_id}>
+                {subjects && subjects.map((s) => (
+                  <TableRow key={s.subject_id}>
                     <TableCell>
                       <div className="flex items-center space-x-3">
-                        <Avatar className="h-8 w-8">
-                          <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white flex items-center justify-center h-full">
+                        {/* <Avatar className="h-8 w-8"> */}
+                          {/* <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white flex items-center justify-center h-full"> */}
                             {/* {s.name?.split(" ").map((n: string) => n[0]).join("")} */}
-                            {s.first_name[0]}{s.last_name[0]} 
-                          </div>
-                        </Avatar>
+                            {/* {s.first_name[0]}{s.last_name[0]}  */}
+                          {/* </div> */}
+                        {/* </Avatar> */}
                         <div>
-                          <p>{s.first_name} {s.last_name}</p>
-                          <p className="text-sm text-muted-foreground">{s.student_id}</p>
+                          <p>{s.subject_id}</p>
+                          {/* <p className="text-sm text-muted-foreground">{s.subject_id}</p> */}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <Badge className={getStatusColor(s.attendance[0]?.status)}>
                         {getStatusIcon(s.attendance[0]?.status)}
                         <span className="ml-1 capitalize">
                           {s.attendance[0]?.status || "N/A"}
                         </span>
                       </Badge>
-                    </TableCell>
+                    </TableCell> */}
+                    <TableCell>{s.subject_name}</TableCell>
+                    <TableCell className="flex-wrap">lorem75</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

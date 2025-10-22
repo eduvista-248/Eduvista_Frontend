@@ -51,8 +51,9 @@ type Mark = {
   subject_id: string
 }
 
-export default function MarksView({ subjects_list, my_class_id }) {
+export default function MarksViewAdmin() {
   const [classes, setClasses] = useState<Class[]>([]);
+  const [subjects, setSubjects] = useState([]);
   const [exams, setExams] = useState<Exam[]>([]);
   const [marksList, setMarksList] = useState<Mark[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -63,46 +64,53 @@ export default function MarksView({ subjects_list, my_class_id }) {
 
   const baseURL = 'http://127.0.0.1:8000';
 
-  console.log("✅MarksView rendered");
-  console.log(subjects_list);
   useEffect(() => {
-    async function fetchClassess() {
-      const teacher = localStorage.getItem("teacher");
-      const teacherData = JSON.parse(teacher);
-      
-      const data = await fetch(`${baseURL}/api/classes/${teacherData.teacher_id}/${selectedSubject}`);
-      const response = await data.json();
-      console.log("classes the teacher ",teacherData.teacher_id, " is handling: ", response," for the subject: ",selectedSubject);
-      setClasses(response);
-      return response;
+    async function fetchClasses() {
+      try{
+        const res = await fetch(`${baseURL}/api/classesAdmin`);
+        const data = await res.json();
+        console.log("Fetched classes data:", data);
+        setClasses(data);
+      }
+      catch(error){
+        console.log("Error fetching classes data:", error);
+      }
     }
+    fetchClasses();
     setExams([
       { exam_id: 1, exam_type: "Midterm" },
       { exam_id: 2, exam_type: "Final" },
       { exam_id: 3, exam_type: "Unit" },
     ]);
-    fetchClassess();
-  }, [selectedSubject]);
+  }, [])
+
+  useEffect(() => {
+    async function fetchSubjects() {
+      try{
+        console.log("selectedClass: ", selectedClass);
+        const res = await fetch(`${baseURL}/api/subjectsClassWise/${selectedClass}`);
+        const data = await res.json();
+        console.log("Fetched subjects data:", data);
+        setSubjects(data);
+      }
+      catch(error){
+        console.log("Error fetching subjects data:", error);
+      }
+    }
+    fetchSubjects();
+  }, [selectedClass])
   
   useEffect(() => {
     async function fetchStudents() {
-      const data = await fetch(`${baseURL}/api/students/${my_class_id}`);
+      const data = await fetch(`${baseURL}/api/students/${selectedClass}`);
       const response = await data.json();
       console.log("response: ", response);
       setStudents(response);
       return response;
     }
-    // if (selectedClass && selectedExam) {
-      // fetchStudents().then((allStudents) => {
-      //   console.log("all students: ", allStudents)
-      // const filtered = allStudents.filter(
-      //   (s) => s.class_id == selectedClass
-      // );
-      // console.log("filtered: ", filtered)
-      // setStudents(filtered);
-      // });
+    if (selectedClass && selectedExam) {
       fetchStudents();
-    // }
+    }
   }, [selectedClass, selectedExam]);
 
   // Initial draft of fetchMarks 
@@ -194,42 +202,43 @@ export default function MarksView({ subjects_list, my_class_id }) {
         <h3 className="text-lg font-semibold" style={{display: "flex", alignItems: "center"}}>View Marks</h3>
       </div>
       <div className="flex gap-8" style={{flexWrap: "wrap"}}>
-        {/* Subject Selection */}
+        {/* Class Selection */}
         <div>
+          <p className="mb-2 font-medium">Select Class</p>
+          <Select onValueChange={(v) => {
+            setSelectedClass(v);
+            setSelectedSubject("");
+            setSelectedExam("");
+            }}>
+            <SelectTrigger className="w-[250px]">
+              <SelectValue placeholder="Choose a subject" />
+            </SelectTrigger>
+            <SelectContent>
+              {classes && classes.map((cl) => (
+                <SelectItem key={cl.class_id} value={String(cl.class_id)}>
+                  {cl.class_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Subject Selection */}
+       {selectedClass && <div>
           <p className="mb-2 font-medium">Select Subject</p>
           <Select onValueChange={(v) => setSelectedSubject(v)}>
             <SelectTrigger className="w-[250px]">
               <SelectValue placeholder="Choose a subject" />
             </SelectTrigger>
             <SelectContent>
-              {subjects_list && subjects_list.map((subj) => (
+              {subjects && subjects.map((subj) => (
                 <SelectItem key={subj.subject_id} value={String(subj.subject_id)}>
                   {subj.subject_name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-        
-
-        {/* Class Selection */}
-        {selectedSubject && (
-          <div>
-          <p className="mb-2 font-medium">Select Class</p>
-          <Select onValueChange={(v) => setSelectedClass(v)}>
-            <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Choose a class" />
-            </SelectTrigger>
-            <SelectContent>
-              {classes.map((cls) => (
-                <SelectItem key={cls.class_id} value={String(cls.class_id)}>
-                  {cls.class_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        )}
+        </div>}
 
         {/* Exam Selection */}
         {selectedClass && selectedSubject && (
@@ -269,7 +278,7 @@ export default function MarksView({ subjects_list, my_class_id }) {
                 {console.log("students: ", students)}
                 return (
                 <TableRow key={s.student_id}>
-                  <TableCell>{student ? `${student.first_name}` : "Unknown Student"}</TableCell>
+                  <TableCell>{student ? `${student.first_name} ${student.last_name}` : "Unknown Student"}</TableCell>
                   <TableCell>{s.marks}</TableCell>
                   <TableCell>{s.max_marks}</TableCell>
                 </TableRow>)

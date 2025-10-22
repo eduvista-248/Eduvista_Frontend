@@ -4,6 +4,7 @@ import { AttendanceTracker } from "./components/AttendanceTracker";
 import { Avatar } from "./components/ui/avatar";
 import { Badge } from "./components/ui/badge";
 import HomePage from "./components/HomePage";
+import HomePageAdmin from "./components/HomepageAdmin";
 import LoginPage from "./components/LoginPage";
 import {Header} from "./components/Header";
 import { HomeLogin } from "./components/HomeLogin";
@@ -68,7 +69,10 @@ export default function App() {
       </>
     )
   }
-
+  if (localStorage.getItem("login_type") === '"admin"') {
+    // localStorage.removeItem("login_type");
+    return <HomePageAdmin teacher={teacherDetails} />;
+  }
   return <HomePage teacher={teacherDetails} />;
   //  onLogout={handleLogout}
 }

@@ -17,7 +17,7 @@ let gradeDistribution = []
 let average = 0;
 
 
-export function DashboardOverview({ my_class_id, teacher_id }) {
+export function DashboardOverviewAdmin({ my_class_id, teacher_id }) {
   const [students, setStudents] = useState();
   const [marksList, setMarksList] = useState();
   const [gradesList, setGradesList] = useState();
