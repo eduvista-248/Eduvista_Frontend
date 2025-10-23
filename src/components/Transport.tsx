@@ -68,9 +68,9 @@ export function Transport() {
                 <input type="text" className="bg-switch-background rounded-md p-1 px-2" placeholder="Student ID" onChange={(e) => setStudent_id(e.target.value)} />
                 <Button variant="outline" onClick={handleSubmit}><Search /></Button>
             </div>
-            {!transportDetails.stop_name && <p>Student didn't opt for school transport.</p>}
-            {transportDetails.stop_name && 
-            <div className="flex flex-wrap items-center justify-evenly gap-2 p-3 bg-blue-50 rounded-lg">
+            {transportDetails && (!transportDetails.stop_name && <p>Student didn't opt for school transport.</p>)}
+            {transportDetails && 
+            (transportDetails.stop_name && <div className="flex flex-wrap items-center justify-evenly gap-2 p-3 bg-blue-50 rounded-lg">
                 <div className="px-1">
                     <p>Stop Name</p>
                     <p className="text-sm text-muted-foreground">{transportDetails.stop_name}</p>
@@ -91,7 +91,7 @@ export function Transport() {
                     <p>Driver Ph. No.</p>
                     <p className="text-sm text-muted-foreground">{transportDetails.driver_contact}</p>
                 </div>
-            </div>}
+            </div>)}
         </div>
       </Card>
     </div>

@@ -158,7 +158,7 @@ export function SubjectsList(){
                 <TableRow>
                   <TableHead>Course Id</TableHead>
                   <TableHead>Course Name</TableHead>
-                  <TableHead>Teacher Ids</TableHead>
+                  {/* <TableHead>Teacher Ids</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -187,7 +187,7 @@ export function SubjectsList(){
                       </Badge>
                     </TableCell> */}
                     <TableCell>{s.subject_name}</TableCell>
-                    <TableCell className="flex-wrap">lorem75</TableCell>
+                    {/* <TableCell className="flex-wrap">lorem75</TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
